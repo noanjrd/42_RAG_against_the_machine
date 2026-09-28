@@ -9,10 +9,17 @@ authors = [
 requires-python = ">=3.13"
 dependencies = [
     "fire>=0.7.1",
+    "pydantic>=2.13.5",
+    "tqdm>=4.70.1",
 ]
 
 [project.scripts]
-42-rag-against-the-machine = "42_rag_against_the_machine:main"
+42-rag-against-the-machine = "src.__main__:main"
+
+[tool.uv.build-backend]
+module-name = "src"
+module-root = ""
+
 
 [build-system]
 requires = ["uv_build>=0.12.5,<0.13.0"]
