@@ -1,5 +1,5 @@
 run:
-	uv run 42-rag-against-the-machine 
+	uv run 42-rag-against-the-machine $(ARGS)
 
 install:
 	uv sync
