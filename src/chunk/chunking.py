@@ -18,19 +18,19 @@ def chunk_large_text(max_chunk_size, file, index, text):
         chunks.append(Chunk(file_path=file, content=content, first_char_index=first, last_char_index=last))
     return chunks
 
-def chunk_text(max_chunk_size: int,file, text, split_char, index=0):
+def chunk_text(max_chunk_size: int,file, text, split_chars, split_chars_i=0, index=0):
     chunks = []
 
-    subtexts = text.split(split_char)
+    subtexts = text.split(split_chars[split_chars_i])
     n = len(subtexts)
     len_subtexts = [len(subtext) for subtext in subtexts]
     for i_sub in range(n):
-        index = sum(len_subtexts[:i_sub]) + len(split_char) * i_sub
+        current_index = index + sum(len_subtexts[:i_sub]) + len(split_chars[split_chars_i]) * i_sub
         current_para_len =  len_subtexts[i_sub] 
-        if current_para_len > max_chunk_size and len(split_char) > 1:
-            chunks += chunk_text(max_chunk_size, file, subtexts[i_sub], split_char[:-1], index=index)
-        elif current_para_len > max_chunk_size and len(split_char) <= 1:
-            chunks += chunk_large_text(max_chunk_size, file, index, subtexts[i_sub])
+        if current_para_len > max_chunk_size and len(split_chars[split_chars_i]) > 1:
+            chunks += chunk_text(max_chunk_size, file, subtexts[i_sub], split_chars, split_chars_i+1, index=current_index)
+        elif current_para_len > max_chunk_size and len(split_chars[split_chars_i]) <= 1:
+            chunks += chunk_large_text(max_chunk_size, file, current_index, subtexts[i_sub])
         else:
             chunks.append(Chunk(file_path=file, first_char_index=index, last_char_index=index+current_para_len, content=subtexts[i_sub]))
             
@@ -43,17 +43,21 @@ def chunk_text(max_chunk_size: int,file, text, split_char, index=0):
 def going_through_data(max_chunk_size: int):
     print("hey2")
     chunks = []
+    print(max_chunk_size)
     for root, dirs, files in os.walk("data/raw/vllm-0.10.1"):
         for file in files:
             name, extension = os.path.splitext(file)
             file = os.path.join(root, file)
             # if extension == ".py":
             #     chunks += chunk_python_code(max_chunk_size, os.path.join(root, file))
-            if extension == ".txt":
-                with open(file, "r") as f:
+            if extension == ".md":
+                with open(file, "r", encoding="utf-8") as f:
                     text = f.read()
-                chunks += chunk_text(max_chunk_size, file, text, "\n\n")
+                # if extension == ".txt":
+                #     chunks += chunk_text(max_chunk_size, file, text, ["\n\n", "\n"])
+                chunks += chunk_text(max_chunk_size, file, text, ["\n# ", "\n## ", "\n### ", "\n\n", "\n"])
+                    
             # print(file)
-    index_t = 1
+    index_t =3
     print(chunks[index_t].content,  chunks[index_t].first_char_index, chunks[index_t].last_char_index, chunks[index_t].file_path)
     return
