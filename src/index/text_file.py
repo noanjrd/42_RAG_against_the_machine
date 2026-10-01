@@ -1,0 +1,35 @@
+from .Chunk import Chunk
+from .utils import split_evey_n_character
+
+
+def chunk_large_text(max_chunk_size, file, index, text):
+    chunks = []
+    subtexts = split_evey_n_character(max_chunk_size, text)
+    n = len(subtexts)
+    for i in range(n):
+        content = subtexts[i]
+        first = max_chunk_size * i + index
+        last = first  + min(max_chunk_size, len(content))
+        chunks.append(Chunk(file_path=file, content=content, first_char_index=first, last_char_index=last, tokenized=None))
+    return chunks
+
+def chunk_text(max_chunk_size: int,file, text, split_chars, split_chars_i=0, index=0):
+    chunks = []
+
+    subtexts = text.split(split_chars[split_chars_i])
+    n = len(subtexts)
+    len_subtexts = [len(subtext) for subtext in subtexts]
+    for i_sub in range(n):
+        current_index = index + sum(len_subtexts[:i_sub]) + len(split_chars[split_chars_i]) * i_sub
+        current_para_len =  len_subtexts[i_sub]
+        if current_para_len > max_chunk_size and split_chars_i >= len(split_chars) -1 :
+            chunks += chunk_text(max_chunk_size, file, subtexts[i_sub], split_chars, split_chars_i+1, index=current_index)
+        elif current_para_len > max_chunk_size:
+            chunks += chunk_large_text(max_chunk_size, file, current_index, subtexts[i_sub])
+        else:
+            chunks.append(Chunk(file_path=file, first_char_index=current_index, last_char_index=current_index+current_para_len, content=subtexts[i_sub], tokenized=None))
+            
+            
+    
+    return chunks
+

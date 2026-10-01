@@ -1,6 +1,12 @@
 run:
 	uv run 42-rag-against-the-machine $(ARGS)
 
+index:
+	uv run 42-rag-against-the-machine index
+
+search:
+	uv run 42-rag-against-the-machine search "what is x" --k 10
+
 install:
 	uv sync
 
