@@ -1,7 +1,7 @@
 import fire
 from .index.indexing import start_indexing
 from .llm.model import LLM
-from .search.searching import start_searching
+from .search.searching import start_searching, start_searching_dataset
 
 class Rag:
     def __init__(self, k=5) -> None:
@@ -31,10 +31,25 @@ class Rag:
             query = args[0]
             llm = LLM()
             print("Query:", query)
-            tokenized_query = llm.tokenize(query)
-            start_searching(tokenized_query)
+            start_searching(llm, query, k)
         except AssertionError as e:
             print("Error:", e)
+            exit(1)
+        except KeyboardInterrupt:
+            print("Program interrupted")
+            exit(1)
+        return
+    
+    def search_dataset(self, dataset_path, save_directory="data/answers",  k=5):
+        try:
+            assert k > 0, "k must be at least 1"
+            llm = LLM()
+            start_searching_dataset(llm, dataset_path, save_directory , k)
+        except AssertionError as e:
+            print("Error:", e)
+            exit(1)
+        except KeyboardInterrupt:
+            print("Program interrupted")
             exit(1)
         return
     

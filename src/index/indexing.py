@@ -1,13 +1,11 @@
-import os 
-import ast
-from ast import AST
+import os
 from .Chunk import Chunk 
 from .python_file import chunk_python_code
 from .text_file import chunk_text
 from ..llm.model import LLM
 from tqdm import tqdm
 from pydantic import TypeAdapter
-import json
+
 
 def save_to_json(chunks: list[Chunk]):
     os.makedirs("data/processed", exist_ok=True)
