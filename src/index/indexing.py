@@ -17,7 +17,7 @@ def save_to_json(chunks: list[Chunk]):
 
 def tokenize_content(chunks: list[Chunk], llm):
     n_chunks = len(chunks)
-    for i in tqdm(range(n_chunks)):
+    for i in tqdm(range(n_chunks), desc="Tokenizing"):
         chunk = chunks[i]
         chunk.tokenized = llm.tokenize(chunk.content)
     # print(t)
@@ -41,14 +41,14 @@ def start_indexing(max_chunk_size: int, llm: LLM):
     files_list = list_all_files()
     n_files = len(files_list)
     print("nb of files:", n_files)
-    for i in tqdm(range(n_files)):
+    for i in tqdm(range(n_files), desc="Chunking"):
         file = files_list[i]
         name, extension = os.path.splitext(file)
         if extension == ".py":
             chunks += chunk_python_code(max_chunk_size, file)
         if extension in [".md", ".txt"]:
             with open(file, "r", encoding="utf-8") as f:
-                text = f.read()
+                text = f.read().lower()
             if extension == ".txt":
                 chunks += chunk_text(max_chunk_size, file, text, ["\n\n", "\n"])
             else:

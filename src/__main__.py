@@ -4,7 +4,7 @@ from .llm.model import LLM
 from .search.searching import start_searching, start_searching_dataset
 
 class Rag:
-    def __init__(self, k=5) -> None:
+    def __init__(self) -> None:
         pass
     
     def test(self):
@@ -44,6 +44,7 @@ class Rag:
         try:
             assert k > 0, "k must be at least 1"
             llm = LLM()
+            print("k:", k)
             start_searching_dataset(llm, dataset_path, save_directory , k)
         except AssertionError as e:
             print("Error:", e)
