@@ -7,3 +7,4 @@ class Chunk(BaseModel):
     first_char_index: int
     last_char_index: int
     tokenized: None | list[str]
+    is_code: bool

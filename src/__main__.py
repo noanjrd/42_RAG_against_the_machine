@@ -1,21 +1,19 @@
 import fire
 from .index.indexing import start_indexing
-from .llm.model import LLM
+from .llm.LLM import LLM
 from .search.searching import start_searching, start_searching_dataset
+from .answer.answering import start_answering, start_answering_dataset
+
 
 class Rag:
     def __init__(self) -> None:
         pass
-    
-    def test(self):
-        print("hey")
         
     def index(self, max_chunk_size=2000):
         try:
             assert max_chunk_size > 0, "max_chunk_size must be at least 1"
             llm = LLM()
             start_indexing(max_chunk_size, llm)
-            print("hey")
         except AssertionError as e:
             print("Error:", e)
             exit(1)
@@ -54,6 +52,35 @@ class Rag:
             exit(1)
         return
     
+    def answer(self, *args, k=5):
+        try:
+            assert len(args) == 1, "Need one query"
+            assert k > 0, "k must be at least 1"
+            query = args[0]
+            llm = LLM()
+            search_result = start_searching(llm, query, k)
+            start_answering(llm, query, search_result)
+        except AssertionError as e:
+            print(e)
+            exit(1)
+        except KeyboardInterrupt:
+            print("Program interrupted")
+            exit(1)
+        return
+        
+    def answer_dataset(self, student_search_results_path, save_directory):
+        try:
+            assert len(student_search_results_path) > 0, "student_search_results_path is empty"
+            assert len(save_directory) > 0, "save_directory is empty"
+            llm = LLM()
+            start_answering_dataset(llm, student_search_results_path, save_directory)
+        except AssertionError as e:
+            print(e)
+            exit(1)
+        except KeyboardInterrupt:
+            print("Program interrupted")
+            exit(1)
+            
     
 def main():
     fire.Fire(Rag)

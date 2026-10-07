@@ -1,1 +1,2 @@
 have to split snake_case and camelCase, lowercase, and keep full identifiers as tokens too
+check the path slashes

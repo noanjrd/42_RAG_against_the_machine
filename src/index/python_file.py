@@ -2,6 +2,7 @@ import ast
 from ast import AST
 from .Chunk import Chunk
 from .utils import split_evey_n_character
+import re
 
 
 def large_code_chunk(max_chunk_size: int, index: int,  source: str, node: AST, file: str):
@@ -16,10 +17,9 @@ def large_code_chunk(max_chunk_size: int, index: int,  source: str, node: AST, f
         content = splitted_code[i]
         first = i * max_chunk_size + index
         last = first + len(content)
-        chunks.append(Chunk(file_path=file,first_char_index=first,last_char_index=last, content=content, tokenized=None))
+        chunks.append(Chunk(file_path=file,first_char_index=first,last_char_index=last, content=content, tokenized=None, is_code=True))
     # print(t)
     return chunks
-
 
 
 
@@ -45,7 +45,7 @@ def chunk_python_code(max_chunk_size: int, file: str):
             if code_size > max_chunk_size:
                 chunks += large_code_chunk(max_chunk_size, index, source, node, file)
             else:
-                chunks.append(Chunk(file_path=file,content=content, first_char_index=index, last_char_index=index+code_size, tokenized=None))
+                chunks.append(Chunk(file_path=file,content=content, first_char_index=index, last_char_index=index+code_size, tokenized=None, is_code=True))
             
             # print(ast.get_source_segment(source, node))
             

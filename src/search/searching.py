@@ -6,6 +6,9 @@ from ..models.student_search import MinimalSearchResults
 import os
 from pydantic import TypeAdapter
 from tqdm import tqdm
+from ..utils import remove_stopwords, add_identifiers
+from ..models.questions import UnansweredQuestion
+from ..models.rag_dataset import RagDataset
 
 
 def open_chunks():
@@ -25,8 +28,6 @@ def find_index_min(array):
     return min_index, min_value
 
 
-
-
 def count_tokens(tokens):
     unique = set(tokens)
     d = {}
@@ -38,7 +39,7 @@ def count_tokens(tokens):
 
 def calculate_BM25(chunks:list[dict], tokenized_quest:  list[list[Token]], avg_token_chunks, k):
     k1 = 1.5
-    b = 0.75
+    b = 0.5
     questions_len = len(tokenized_quest)
     top_k_chunks = [[] for _ in range(questions_len)]
     nb_chunks = len(chunks)
@@ -87,7 +88,7 @@ def count_tokens_chunks(chunks, tokenized_quest: list[list[Token]]):
     return avg_token_chunks / len(chunks)
 
 
-def retrieving(tokenized_questions, k):
+def retrieving(tokenized_questions, k) -> list[list[MinimalSource]]:
     chunks = open_chunks()
     avg_token_chunks = count_tokens_chunks(chunks, tokenized_questions)
     top_k_chunks = calculate_BM25(chunks, tokenized_questions, avg_token_chunks, k)
@@ -105,11 +106,14 @@ def retrieving(tokenized_questions, k):
 
 def start_searching_dataset(llm, dataset_path, save_directory , k):
     with open(dataset_path, "r", encoding='utf-8') as f:
-        questions = json.load(f)["rag_questions"]
+        rag_dataset = RagDataset.model_validate_json(f.read())
     file_name = os.path.basename(dataset_path)
     tokenized_questions = []
-    for question in questions:
-        tokens = llm.tokenize(question["question"].lower())
+    for question in rag_dataset.rag_questions:
+        tokens = llm.tokenize(question.question.lower())
+        tokens = list(set(tokens))
+        tokens = remove_stopwords(tokens)
+        tokens += add_identifiers(question.question)
         list_tokens = []
         for token in tokens:
             list_tokens.append(Token(token))
@@ -119,10 +123,10 @@ def start_searching_dataset(llm, dataset_path, save_directory , k):
     list_top_minimal_source = retrieving(tokenized_questions, k)
     
     list_minimal_search_res = []
-    for i_quest, question in enumerate(questions):
-        question_text = question["question"]
+    for i_quest, question in enumerate(rag_dataset.rag_questions):
+        question_text = question.question
         sources = list_top_minimal_source[i_quest]
-        minimal_search_res = MinimalSearchResults(question_id=question["question_id"], question=question_text, retrieved_sources=sources)
+        minimal_search_res = MinimalSearchResults(question_id=question.question_id, question=question_text, retrieved_sources=sources)
         list_minimal_search_res.append(minimal_search_res)
         
     os.makedirs(save_directory, exist_ok=True)
@@ -134,13 +138,13 @@ def start_searching_dataset(llm, dataset_path, save_directory , k):
 
 def start_searching(llm, query: str, k: int):
     tokenized_query = llm.tokenize(query.lower())
+    tokenized_query = remove_stopwords(tokenized_query)
     tokens = [[Token(token) for token in tokenized_query]]
     
     list_top_minimal_source = retrieving(tokens, k)
-    output = {"k": k, "question": query, "retrieved_sources": [s.model_dump() for s in list_top_minimal_source[0]]}
-    path = "data/output/search_results"
-    os.makedirs(path, exist_ok=True)
-    path = os.path.join(path, "chunks.json")
-    with open(path, "w", encoding='utf-8') as f:
-        json.dump(output ,f, indent=2, ensure_ascii=False)
-    return
+    output = {"k": k, "question": query, "retrieved_sources": []}
+    for min_s  in list_top_minimal_source[0]:
+        print(f"{min_s.file_path} [{min_s.first_character_index}:{min_s.first_character_index}]")
+        output["retrieved_sources"].append(min_s.model_dump())
+
+    return output
