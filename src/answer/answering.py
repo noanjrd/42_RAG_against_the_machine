@@ -4,16 +4,33 @@ import json
 from tqdm import tqdm
 import os
 
+def remove_touching(sources):
+    n = len(sources)
+    i = 0
+    while i < n-1:
+        first = sources[i]["last_character_index"]
+        last = sources[i+1]["first_character_index"]
+        if first <= last and first + 10 >= last and sources[i]["file_path"] == sources[i+1]["file_path"]:
+            sources[i]["last_character_index"] = sources[i+1]["last_character_index"]
+            sources.pop(i+1)
+            n -= 1
+            continue
+        i+=1
+    return sources
 
 def make_prompt(query, sources):
+    sources = [dict(s) for s in sources]
     prompt = "Documentation: \n"
+    sources.sort(key=lambda x: (x["file_path"], x["first_character_index"]))
+    sources = remove_touching(sources)
     for source in sources:
         with open(source["file_path"], "r", encoding='utf-8') as f:
             content = f.read()
             content = content[source["first_character_index"] : source["last_character_index"]]
             prompt += content
             prompt += "\n\n"
-    prompt += f"Question: {query}"
+    prompt += f"Question: {query}\n"
+    prompt += f"Only answer from the documentation and say so when the documentation is insufficient."
     return prompt
 
 
