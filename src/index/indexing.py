@@ -16,9 +16,11 @@ def save_to_json(chunks: list[Chunk]):
         
         
 def path_token(path):
+    path = os.path.relpath(path, "data/raw/vllm-0.10.1")
     path = path.lower()
     path = os.path.splitext(path)[0]
     return [p for p in re.split(r"[^a-z0-9]+", path) if p]
+    #  meaning ^ (not) [a-z0-9] (any lowercase letter or digit).
 
 
 def tokenize_content(chunks: list[Chunk], llm):

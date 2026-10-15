@@ -1,4 +1,5 @@
 import re
+import keyword
 
 STOPWORDS = {
     # articles, prepositions, conjunctions
@@ -12,13 +13,16 @@ STOPWORDS = {
     "i", "you", "he", "she", "it", "we", "they", "me", "my", "your", "its",
     "this", "that", "these", "those", "there", "here", "some", "any",
     # question words
-    "what", "which", "who", "whom", "where", "when", "why", "how"
+    "what", "which", "who", "whom", "where", "when", "why", "how", ",", ":", ".", "!", ";"
 }
 
 def remove_stopwords(tokens: list[str]) -> list[str]:
     result = []
     for token in tokens:
         word = token.lstrip("Ġ")
+        word = word.replace('é', 'e')
+        word = word.replace('è', 'e')
+        word = word.replace('à', 'a')
         if word  and word not in STOPWORDS:
             result.append(word)
     return result
@@ -26,11 +30,11 @@ def remove_stopwords(tokens: list[str]) -> list[str]:
 
 def add_identifiers(content):
     identifiers = re.findall(r"[A-Za-z_][A-Za-z0-9_]*", content)
-    # identifiers = [t for t in identifiers if not keyword.iskeyword(t)]
+    identifiers = [t for t in identifiers if not keyword.iskeyword(t)]
     new = []
     for identifier in identifiers:
         identifier = identifier.lower()
         new.append(identifier)
         splitted = identifier.split('_')
-        new += [el for el in splitted if len(el) > 0]
+        new += [el for el in splitted if el]
     return new

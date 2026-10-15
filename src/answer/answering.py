@@ -40,11 +40,7 @@ def start_answering_dataset(llm: LLM, student_search_results_path: str, save_dir
     file_name = os.path.basename(student_search_results_path)
     output = {"k": file["k"], "search_results": []}
     file = file["search_results"]
-    index = 0
     for q in tqdm(file, desc="Answering"):
-        if index == 2:
-            break
-        index +=1
         prompt = make_prompt(q["question"], q["retrieved_sources"])
         answer = llm.answer(prompt)
         MiniAns = MinimalAnswer(answer=answer, question_id=q["question_id"], question=q["question"], retrieved_sources=q["retrieved_sources"])

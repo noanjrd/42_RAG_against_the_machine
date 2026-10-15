@@ -38,7 +38,7 @@ def count_tokens(tokens):
 
 
 def calculate_BM25(chunks:list[dict], tokenized_quest:  list[list[Token]], avg_token_chunks, k):
-    k1 = 1.5
+    k1 = 1
     b = 0.5
     questions_len = len(tokenized_quest)
     top_k_chunks = [[] for _ in range(questions_len)]
@@ -51,7 +51,7 @@ def calculate_BM25(chunks:list[dict], tokenized_quest:  list[list[Token]], avg_t
             score = 0
             for i, token in enumerate(quest):
                 IDF = math.log(
-                    (nb_chunks - token.document_frequency + 0.5)
+                    1 + (nb_chunks - token.document_frequency + 0.5)
                     / (token.document_frequency + 0.5))
                 count = chunk["count_list"][quest_i][i]
                 score += IDF * (count * (k1 + 1)) / (count + k1 * (1 - b + b * (len_chunk / avg_token_chunks)))
@@ -113,7 +113,7 @@ def start_searching_dataset(llm, dataset_path, save_directory , k):
         tokens = llm.tokenize(question.question.lower())
         tokens = list(set(tokens))
         tokens = remove_stopwords(tokens)
-        tokens += add_identifiers(question.question)
+        # tokens += add_identifiers(question.question)
         list_tokens = []
         for token in tokens:
             list_tokens.append(Token(token))

@@ -2,12 +2,12 @@ run:
 	uv run 42-rag-against-the-machine $(ARGS)
 
 index:
-	uv run 42-rag-against-the-machine index
+	HF_HUB_OFFLINE=1 uv run 42-rag-against-the-machine index
 
 search:
 	uv run 42-rag-against-the-machine search "where will i be able to see the benchmark results" --k 10
 
-search_dataset_doc:
+search_dataset_docs:
 	HF_HUB_OFFLINE=1 uv run 42-rag-against-the-machine search_dataset --dataset_path ./downloads/datasets_public/UnansweredQuestions/dataset_docs_public.json --save_directory data/output/search_results/UnansweredQuestions --k 10
 
 search_dataset_code:
@@ -16,8 +16,12 @@ search_dataset_code:
 answer:
 	uv run 42-rag-against-the-machine answer "what are the standards?" --k 5
 
-answer_dataset_doc:
+answer_dataset_docs:
 	uv run 42-rag-against-the-machine answer_dataset --student_search_results_path data/output/search_results/UnansweredQuestions/dataset_docs_public.json --save_directory data/output/search_results_and_answer/UnansweredQuestions
+
+answer_dataset_code:
+	uv run 42-rag-against-the-machine answer_dataset --student_search_results_path data/output/search_results/UnansweredQuestions/dataset_code_public.json --save_directory data/output/search_results_and_answer/UnansweredQuestions
+
 
 install:
 	uv sync
