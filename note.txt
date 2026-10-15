@@ -1,0 +1,1 @@
+change the lint command with . instead or src at evaluation

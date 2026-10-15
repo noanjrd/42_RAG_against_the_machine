@@ -8,8 +8,8 @@ from .answer.answering import start_answering, start_answering_dataset
 class Rag:
     def __init__(self) -> None:
         pass
-        
-    def index(self, max_chunk_size=2000):
+
+    def index(self, max_chunk_size: int = 2000) -> None:
         try:
             assert max_chunk_size > 0, "max_chunk_size must be at least 1"
             llm = LLM()
@@ -21,8 +21,8 @@ class Rag:
             print("Program interrupted")
             exit(1)
         return
-        
-    def search(self, *args,  k=5):
+
+    def search(self, *args: str, k: int = 5) -> None:
         try:
             assert len(args) == 1, "Need one query"
             assert k > 0, "k must be at least 1"
@@ -37,13 +37,15 @@ class Rag:
             print("Program interrupted")
             exit(1)
         return
-    
-    def search_dataset(self, dataset_path, save_directory="data/answers",  k=5):
+
+    def search_dataset(self, dataset_path: str,
+                       save_directory: str = "data/answers",
+                       k: int = 5) -> None:
         try:
             assert k > 0, "k must be at least 1"
             llm = LLM()
             print("k:", k)
-            start_searching_dataset(llm, dataset_path, save_directory , k)
+            start_searching_dataset(llm, dataset_path, save_directory, k)
         except AssertionError as e:
             print("Error:", e)
             exit(1)
@@ -51,8 +53,8 @@ class Rag:
             print("Program interrupted")
             exit(1)
         return
-    
-    def answer(self, *args, k=5):
+
+    def answer(self, *args: str, k: int = 5) -> None:
         try:
             assert len(args) == 1, "Need one query"
             assert k > 0, "k must be at least 1"
@@ -67,23 +69,27 @@ class Rag:
             print("Program interrupted")
             exit(1)
         return
-        
-    def answer_dataset(self, student_search_results_path, save_directory):
+
+    def answer_dataset(self, student_search_results_path: str,
+                       save_directory: str) -> None:
         try:
-            assert len(student_search_results_path) > 0, "student_search_results_path is empty"
+            assert student_search_results_path, \
+                "student_search_results_path is empty"
             assert len(save_directory) > 0, "save_directory is empty"
             llm = LLM()
-            start_answering_dataset(llm, student_search_results_path, save_directory)
+            start_answering_dataset(
+                llm, student_search_results_path, save_directory)
         except AssertionError as e:
             print(e)
             exit(1)
         except KeyboardInterrupt:
             print("Program interrupted")
             exit(1)
-            
-    
-def main():
+
+
+def main() -> None:
     fire.Fire(Rag)
+
 
 if __name__ == "__main__":
     main()

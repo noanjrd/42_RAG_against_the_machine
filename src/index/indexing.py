@@ -1,5 +1,5 @@
 import os
-from .Chunk import Chunk 
+from .Chunk import Chunk
 from .python_file import chunk_python_code
 from .text_file import chunk_text
 from ..llm.LLM import LLM
@@ -9,13 +9,13 @@ from ..utils import remove_stopwords, add_identifiers
 import re
 
 
-def save_to_json(chunks: list[Chunk]):
+def save_to_json(chunks: list[Chunk]) -> None:
     os.makedirs("data/processed", exist_ok=True)
     with open("data/processed/index.json", "wb") as f:
         f.write(TypeAdapter(list[Chunk]).dump_json(chunks, indent=2))
-        
-        
-def path_token(path):
+
+
+def path_token(path: str) -> list[str]:
     path = os.path.relpath(path, "data/raw/vllm-0.10.1")
     path = path.lower()
     path = os.path.splitext(path)[0]
@@ -23,7 +23,7 @@ def path_token(path):
     #  meaning ^ (not) [a-z0-9] (any lowercase letter or digit).
 
 
-def tokenize_content(chunks: list[Chunk], llm):
+def tokenize_content(chunks: list[Chunk], llm: LLM) -> None:
     n_chunks = len(chunks)
     for i in tqdm(range(n_chunks), desc="Tokenizing"):
         chunk = chunks[i]
@@ -31,7 +31,7 @@ def tokenize_content(chunks: list[Chunk], llm):
         tokenized = llm.tokenize(content)
         tokenized = remove_stopwords(tokenized)
         chunk.tokenized = tokenized
-        if chunk.is_code == True:
+        if chunk.is_code:
             tokenized += path_token(chunk.file_path)
             chunk.tokenized += add_identifiers(chunk.content)
     # print(t)
@@ -39,7 +39,7 @@ def tokenize_content(chunks: list[Chunk], llm):
     return
 
 
-def list_all_files():
+def list_all_files() -> list[str]:
     files_list = []
     for root, dirs, files in os.walk("data/raw/vllm-0.10.1"):
         for file in files:
@@ -50,7 +50,8 @@ def list_all_files():
                 files_list.append(file)
     return files_list
 
-def start_indexing(max_chunk_size: int, llm: LLM):
+
+def start_indexing(max_chunk_size: int, llm: LLM) -> None:
     chunks = []
     print(max_chunk_size)
     files_list = list_all_files()
@@ -65,14 +66,16 @@ def start_indexing(max_chunk_size: int, llm: LLM):
             with open(file, "r", encoding="utf-8") as f:
                 text = f.read()
             if extension == ".txt":
-                chunks += chunk_text(max_chunk_size, file, text, ["\n\n", "\n"])
+                chunks += chunk_text(max_chunk_size, file,
+                                     text, ["\n\n", "\n"])
             else:
-                chunks += chunk_text(max_chunk_size, file, text, ["\n# ", "\n## ", "\n### ", "\n\n", "\n"])
-                    
+                chunks += chunk_text(max_chunk_size, file, text,
+                                     ["\n# ", "\n## ", "\n### ", "\n\n", "\n"])
+
             # print(file)
-    tokenize_content(chunks,llm)
+    tokenize_content(chunks, llm)
     save_to_json(chunks)
-    print(f"Ingestion complete! Indexed {len(chunks)} chunks under data/processed")
+    print(f"Ingestion complete! Indexed {len(chunks)} chunks "
+          "under data/processed")
     # index_t =3
-    # print(chunks[index_t].content,  chunks[index_t].first_char_index, chunks[index_t].last_char_index, chunks[index_t].file_path, chunks[index_t].tokenized)
     return

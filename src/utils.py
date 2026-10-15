@@ -3,7 +3,8 @@ import keyword
 
 STOPWORDS = {
     # articles, prepositions, conjunctions
-    "a", "an", "the", "of", "to", "in", "on", "at", "by", "for", "with", "from",
+    "a", "an", "the", "of", "to", "in", "on", "at", "by", "for", "with",
+    "from",
     "as", "into", "about", "and", "or", "but", "if", "than", "then", "so",
     # verbs "be/do/have" and modals
     "is", "are", "was", "were", "be", "been", "being", "am",
@@ -13,22 +14,31 @@ STOPWORDS = {
     "i", "you", "he", "she", "it", "we", "they", "me", "my", "your", "its",
     "this", "that", "these", "those", "there", "here", "some", "any",
     # question words
-    "what", "which", "who", "whom", "where", "when", "why", "how", ",", ":", ".", "!", ";"
+    "what", "which", "who", "whom", "where", "when", "why", "how",
+    ",", ":", ".", "!", ";"
 }
 
+
+def split_evey_n_character(max_chunk_size: int, text: str) -> list[str]:
+    n = len(text)
+    splitted_text = [text[i: i + max_chunk_size]
+                     for i in range(0, n, max_chunk_size)]
+    return splitted_text
+
+
 def remove_stopwords(tokens: list[str]) -> list[str]:
-    result = []
+    result: list[str] = []
     for token in tokens:
         word = token.lstrip("Ġ")
         word = word.replace('é', 'e')
         word = word.replace('è', 'e')
         word = word.replace('à', 'a')
-        if word  and word not in STOPWORDS:
+        if word and word not in STOPWORDS:
             result.append(word)
     return result
 
 
-def add_identifiers(content):
+def add_identifiers(content: str) -> list[str]:
     identifiers = re.findall(r"[A-Za-z_][A-Za-z0-9_]*", content)
     identifiers = [t for t in identifiers if not keyword.iskeyword(t)]
     new = []
