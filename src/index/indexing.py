@@ -1,3 +1,4 @@
+"""Indexing pipeline: list, chunk, tokenize and save."""
 import os
 from .Chunk import Chunk
 from .python_file import chunk_python_code
@@ -10,12 +11,31 @@ import re
 
 
 def save_to_json(chunks: list[Chunk]) -> None:
+    """Write the chunks to data/processed/index.json.
+
+    Args:
+        chunks: Chunks to serialize.
+
+    Returns:
+        None.
+    """
     os.makedirs("data/processed", exist_ok=True)
     with open("data/processed/index.json", "wb") as f:
         f.write(TypeAdapter(list[Chunk]).dump_json(chunks, indent=2))
 
 
 def path_token(path: str) -> list[str]:
+    """Turn a file path into lowercase alphanumeric tokens.
+
+    The path is made relative to data/raw/vllm-0.10.1 and its extension
+    is removed.
+
+    Args:
+        path: Path of a file inside the vLLM sources.
+
+    Returns:
+        The alphanumeric words of the path.
+    """
     path = os.path.relpath(path, "data/raw/vllm-0.10.1")
     path = path.lower()
     path = os.path.splitext(path)[0]
@@ -24,6 +44,18 @@ def path_token(path: str) -> list[str]:
 
 
 def tokenize_content(chunks: list[Chunk], llm: LLM) -> None:
+    """Fill the tokenized field of every chunk (in place).
+
+    Tokens are lowercased and stripped of stopwords. For code chunks the
+    identifiers are also added.
+
+    Args:
+        chunks: Chunks to tokenize.
+        llm: LLM whose tokenizer is used.
+
+    Returns:
+        None.
+    """
     n_chunks = len(chunks)
     for i in tqdm(range(n_chunks), desc="Tokenizing"):
         chunk = chunks[i]
@@ -40,6 +72,11 @@ def tokenize_content(chunks: list[Chunk], llm: LLM) -> None:
 
 
 def list_all_files() -> list[str]:
+    """List the .md, .txt and .py files of data/raw/vllm-0.10.1.
+
+    Returns:
+        File paths using "/" as separator.
+    """
     files_list = []
     for root, dirs, files in os.walk("data/raw/vllm-0.10.1"):
         for file in files:
@@ -52,6 +89,15 @@ def list_all_files() -> list[str]:
 
 
 def start_indexing(max_chunk_size: int, llm: LLM) -> None:
+    """Run the whole indexing: chunk, tokenize and save.
+
+    Args:
+        max_chunk_size: Maximum number of characters per chunk.
+        llm: LLM whose tokenizer is used.
+
+    Returns:
+        None. The index is saved in data/processed/index.json.
+    """
     chunks = []
     print(max_chunk_size)
     files_list = list_all_files()

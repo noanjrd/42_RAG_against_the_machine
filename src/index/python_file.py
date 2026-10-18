@@ -1,3 +1,4 @@
+"""Chunking of Python files based on their functions."""
 import ast
 from ast import AST
 from .Chunk import Chunk
@@ -10,6 +11,18 @@ def large_code_chunk(
         source: str,
         node: AST,
         file: str) -> list[Chunk]:
+    """Split an oversized function into fixed-size chunks.
+
+    Args:
+        max_chunk_size: Maximum number of characters per chunk.
+        index: Offset of the function in the file.
+        source: Full source of the file.
+        node: AST node of the function.
+        file: Path of the file.
+
+    Returns:
+        The chunks, or an empty list if node is not a function.
+    """
     if not isinstance(node, ast.FunctionDef):
         return []
     code = ast.get_source_segment(source, node)
@@ -34,6 +47,17 @@ def large_code_chunk(
 
 
 def chunk_python_code(max_chunk_size: int, file: str) -> list[Chunk]:
+    """Create one chunk per function of a Python file.
+
+    Functions longer than max_chunk_size are split further.
+
+    Args:
+        max_chunk_size: Maximum number of characters per chunk.
+        file: Path of the Python file.
+
+    Returns:
+        The code chunks of the file.
+    """
     with open(file, "r", encoding="utf-8") as f:
         source = f.read()
 

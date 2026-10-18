@@ -1,9 +1,21 @@
+"""Chunking of text and markdown files."""
 from .Chunk import Chunk
 from ..utils import split_evey_n_character
 
 
 def chunk_large_text(max_chunk_size: int, file: str, index: int,
                      text: str) -> list[Chunk]:
+    """Split an oversized text into fixed-size chunks.
+
+    Args:
+        max_chunk_size: Maximum number of characters per chunk.
+        file: Path of the file.
+        index: Offset of the text in the file.
+        text: Text to split.
+
+    Returns:
+        The chunks, in order.
+    """
     chunks = []
     subtexts = split_evey_n_character(max_chunk_size, text)
     n = len(subtexts)
@@ -29,6 +41,22 @@ def chunk_text(
         split_chars: list[str],
         split_chars_i: int = 0,
         index: int = 0) -> list[Chunk]:
+    """Recursively split a text on a list of separators.
+
+    Pieces that fit in max_chunk_size become chunks. Larger pieces are
+    split with the next separator, or by fixed size when none is left.
+
+    Args:
+        max_chunk_size: Maximum number of characters per chunk.
+        file: Path of the file.
+        text: Text to split.
+        split_chars: Separators, from the coarsest to the finest.
+        split_chars_i: Index of the separator currently used.
+        index: Offset of text in the file.
+
+    Returns:
+        The chunks of the text.
+    """
     chunks = []
 
     subtexts = text.split(split_chars[split_chars_i])
