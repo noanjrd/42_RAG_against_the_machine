@@ -91,7 +91,7 @@ def calculate_BM25(chunks: list[dict[str, Any]],
             score = 0
             for i, token in enumerate(quest):
                 IDF = math.log(
-                    1 + (nb_chunks - token.document_frequency + 0.5)
+                    (nb_chunks + 0.5)
                     / (token.document_frequency + 0.5))
                 count = chunk["count_list"][quest_i][i]
                 norm = 1 - b + b * (len_chunk / avg_token_chunks)
