@@ -22,6 +22,9 @@ answer_dataset_docs:
 answer_dataset_code:
 	uv run 42-rag-against-the-machine answer_dataset --student_search_results_path data/output/search_results/UnansweredQuestions/dataset_code_public.json --save_directory data/output/search_results_and_answer/UnansweredQuestions
 
+evaluate_docs:
+	uv run 42-rag-against-the-machine evaluate --student_search_results_path data/output/search_results/UnansweredQuestions/dataset_docs_public.json --dataset_path data/datasets/AnsweredQuestions/dataset_docs_public.json
+
 
 install:
 	uv sync

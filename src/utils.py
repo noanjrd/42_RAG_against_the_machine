@@ -1,5 +1,6 @@
 import re
 import keyword
+from typing import Any
 
 STOPWORDS = {
     # articles, prepositions, conjunctions
@@ -79,3 +80,33 @@ def add_identifiers(content: str) -> list[str]:
         splitted = identifier.split('_')
         new += [el for el in splitted if el]
     return new
+
+
+def remove_touching(sources: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Merge consecutive sources that are adjacent in the same file.
+
+    Two sources are merged when the second starts at most 10 characters
+    after the end of the first. The list must be sorted by file and start
+    index. It is modified in place.
+
+    Args:
+        sources: Sources as dictionaries with file_path,
+            first_character_index and last_character_index.
+
+    Returns:
+        The merged sources.
+    """
+    n = len(sources)
+    i = 0
+    while i < n - 1:
+        first = sources[i]["last_character_index"]
+        last = sources[i + 1]["first_character_index"]
+        same_file = sources[i]["file_path"] == sources[i + 1]["file_path"]
+        if first <= last and first + 30 >= last and same_file:
+            sources[i]["last_character_index"] = (
+                sources[i + 1]["last_character_index"])
+            sources.pop(i + 1)
+            n -= 1
+            continue
+        i += 1
+    return sources

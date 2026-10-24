@@ -4,7 +4,7 @@ from .index.indexing import start_indexing
 from .llm.LLM import LLM
 from .search.searching import start_searching, start_searching_dataset
 from .answer.answering import start_answering, start_answering_dataset
-
+from .evaluation.evaluating import start_evaluating
 
 class Rag:
     """Command line interface of the RAG pipeline.
@@ -137,6 +137,9 @@ class Rag:
         except KeyboardInterrupt:
             print("Program interrupted")
             exit(1)
+            
+    def evaluate(self, student_search_results_path: str, dataset_path: str):
+        start_evaluating(student_search_results_path, dataset_path)
 
 
 def main() -> None:
