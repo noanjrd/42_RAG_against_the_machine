@@ -6,6 +6,7 @@ from .search.searching import start_searching, start_searching_dataset
 from .answer.answering import start_answering, start_answering_dataset
 from .evaluation.evaluating import start_evaluating
 
+
 class Rag:
     """Command line interface of the RAG pipeline.
 
@@ -137,8 +138,18 @@ class Rag:
         except KeyboardInterrupt:
             print("Program interrupted")
             exit(1)
-            
-    def evaluate(self, student_search_results_path: str, dataset_path: str):
+
+    def evaluate(self, student_search_results_path: str,
+                 dataset_path: str) -> None:
+        """Compute the recall score of a saved search-results file.
+
+        A question counts as found when a retrieved source comes from the
+        expected file and covers enough of the expected source.
+
+        Args:
+            student_search_results_path: File written by search_dataset.
+            dataset_path: Matching answered-questions dataset file.
+        """
         start_evaluating(student_search_results_path, dataset_path)
 
 

@@ -8,7 +8,6 @@ from ..utils import remove_touching
 from typing import Any
 
 
-
 def make_prompt(query: str, sources: list[Any]) -> str:
     """Build the prompt from a question and its retrieved sources.
 

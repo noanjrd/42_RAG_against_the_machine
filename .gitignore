@@ -2,7 +2,7 @@ __pycache__
 venv
 .venv
 downloads
-data
-llm
+processed
+output
 venv
 .vscode

@@ -1,1 +1,4 @@
 change the lint command with . instead or src at evaluation
+need to download the vllm
+need to display whatis the loading bar during seaching operations
+need to write the 42 READMEs
