@@ -1,5 +1,5 @@
 run:
-	uv run 42-rag-against-the-machine $(ARGS)
+	uv run 42-rag-against-the-machine
 
 index:
 	uv run 42-rag-against-the-machine index
@@ -32,7 +32,11 @@ install:
 	uv sync
 
 debug:
-	uv run $(py) -m pdb src
+	uv run python -m pdb -m src
 
 lint: 
-	uv run flake8 src && mypy src --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
+	uv run flake8 src && uv run mypy src --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
+
+clean:
+	find src -type d -name '__pycache__' -prune -exec rm -rf {} +
+	rm -rf data/output .pytest_cache .pytest_tmp .mypy_cache

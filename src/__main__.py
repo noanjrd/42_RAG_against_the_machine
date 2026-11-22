@@ -5,7 +5,7 @@ from .llm.LLM import LLM
 from .search.searching import start_searching, start_searching_dataset
 from .answer.answering import start_answering, start_answering_dataset
 from .evaluation.evaluating import start_evaluating
-
+import sys
 
 class Rag:
     """Command line interface of the RAG pipeline.
@@ -31,10 +31,7 @@ class Rag:
             start_indexing(max_chunk_size, llm)
         except AssertionError as e:
             print("Error:", e)
-            exit(1)
-        except KeyboardInterrupt:
-            print("Program interrupted")
-            exit(1)
+            sys.exit(1)
         return
 
     def search(self, *args: str, k: int = 5) -> None:
@@ -56,10 +53,7 @@ class Rag:
             start_searching(llm, query, k)
         except AssertionError as e:
             print("Error:", e)
-            exit(1)
-        except KeyboardInterrupt:
-            print("Program interrupted")
-            exit(1)
+            sys.exit(1)
         return
 
     def search_dataset(self, dataset_path: str,
@@ -82,10 +76,7 @@ class Rag:
             start_searching_dataset(llm, dataset_path, save_directory, k)
         except AssertionError as e:
             print("Error:", e)
-            exit(1)
-        except KeyboardInterrupt:
-            print("Program interrupted")
-            exit(1)
+            sys.exit(1)
         return
 
     def answer(self, *args: str, k: int = 5) -> None:
@@ -107,10 +98,7 @@ class Rag:
             start_answering(llm, query, search_result)
         except AssertionError as e:
             print(e)
-            exit(1)
-        except KeyboardInterrupt:
-            print("Program interrupted")
-            exit(1)
+            sys.exit(1)
         return
 
     def answer_dataset(self, student_search_results_path: str,
@@ -134,10 +122,7 @@ class Rag:
                 llm, student_search_results_path, save_directory)
         except AssertionError as e:
             print(e)
-            exit(1)
-        except KeyboardInterrupt:
-            print("Program interrupted")
-            exit(1)
+            sys.exit(1)
 
     def evaluate(self, student_search_results_path: str,
                  dataset_path: str) -> None:
@@ -159,7 +144,14 @@ def main() -> None:
     Returns:
         None.
     """
-    fire.Fire(Rag)
+    try:
+        fire.Fire(Rag)
+    except KeyboardInterrupt:
+        print("Program interrupted")
+        sys.exit(1)
+    except Exception as e:
+        print("Error caught:",e)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

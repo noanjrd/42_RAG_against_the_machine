@@ -4,7 +4,7 @@ from typing import Any
 from .Token import Token
 import math
 from ..models.minimal_source import MinimalSource
-from ..models.student_search import MinimalSearchResults
+from ..models.student_search import MinimalSearchResults, StudentSearchResults
 import os
 from tqdm import tqdm
 from ..utils import remove_stopwords
@@ -218,12 +218,11 @@ def start_searching_dataset(llm: LLM, dataset_path: str,
             retrieved_sources=sources)
         list_minimal_search_res.append(minimal_search_res)
 
+    student_results = StudentSearchResults(search_results=list_minimal_search_res, k=k)
     os.makedirs(save_directory, exist_ok=True)
     path = os.path.join(save_directory, file_name)
     with open(path, "w", encoding='utf-8') as f:
-        results = [result.model_dump() for result in list_minimal_search_res]
-        json.dump({"k": k, "search_results": results}, f,
-                  indent=2, ensure_ascii=False)
+        f.write(student_results.model_dump_json(indent=2))
     print("Saved student_search_results to", path)
 
 
@@ -247,7 +246,7 @@ def start_searching(llm: LLM, query: str, k: int) -> dict[str, Any]:
         "k": k, "question": query, "retrieved_sources": []}
     for min_s in list_top_minimal_source[0]:
         print(f"{min_s.file_path} [{min_s.first_character_index}:"
-              f"{min_s.first_character_index}]")
+              f"{min_s.last_character_index}]")
         output["retrieved_sources"].append(min_s.model_dump())
 
     return output
