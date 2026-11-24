@@ -75,13 +75,16 @@ def start_answering_dataset(student_search_results_path: str,
             output["search_results"].append(MiniAns.model_dump())
         except Exception:
             continue
-    student_search_answer = StudentSearchResultsAndAnswer(k=output["k"], 
-                                            search_results=output["search_results"])
+    student_search_answer = StudentSearchResultsAndAnswer(
+        k=output["k"],
+        search_results=output["search_results"])
     os.makedirs(save_directory, exist_ok=True)
     path = os.path.join(save_directory, file_name)
     with open(path, "w", encoding='utf-8') as f:
         f.write(student_search_answer.model_dump_json(indent=2))
-    print(f"Loaded {file_n} questions ... Processed {len(student_search_answer.search_results)} of {file_n} questions")
+    processed = len(student_search_answer.search_results)
+    print(f"Loaded {file_n} questions ... "
+          f"Processed {processed} of {file_n} questions")
     print(f"Saved student_search_results_and_answer to {save_directory}")
     return
 

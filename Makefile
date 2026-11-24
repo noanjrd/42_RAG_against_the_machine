@@ -2,10 +2,10 @@ run:
 	uv run python -m src
 
 index:
-	HF_HUB_OFFLINE=1 uv run python -m src index
+	 uv run python -m src index
 
 search:
-	uv run python -m src search "where will i be able to see the benchmark results" --k 10
+	HF_HUB_OFFLINE=1 uv run python -m src search "where will i be able to see the benchmark results" --k 5
 
 search_dataset_docs:
 	HF_HUB_OFFLINE=1 uv run python -m src search_dataset --dataset_path ./data/datasets/UnansweredQuestions/dataset_docs_public.json --save_directory data/output/search_results/UnansweredQuestions --k 10

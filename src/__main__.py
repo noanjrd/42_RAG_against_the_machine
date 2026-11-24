@@ -27,6 +27,8 @@ class Rag:
             None. Exits with status 1 on invalid input or interruption.
         """
         try:
+            assert isinstance(max_chunk_size,
+                              int), "max_chunk_size must be an Int"
             assert max_chunk_size > 0, "max_chunk_size must be at least 1"
             start_indexing(max_chunk_size)
         except AssertionError as e:
@@ -46,9 +48,10 @@ class Rag:
         """
         try:
             assert len(args) == 1, "Need one query"
+            assert len(args[0].strip()) > 0, "Empty query"
+            assert isinstance(k, int), "k must be an Int"
             assert k > 0, "k must be at least 1"
             query = args[0]
-            print("Query:", query)
             llm = LLM()
             start_searching(llm, query, k)
         except AssertionError as e:
@@ -70,8 +73,8 @@ class Rag:
             None. Exits with status 1 on invalid input or interruption.
         """
         try:
+            assert isinstance(k, int), "k must be an Int"
             assert k > 0, "k must be at least 1"
-            print("k:", k)
             start_searching_dataset(dataset_path, save_directory, k)
         except AssertionError as e:
             print("Error:", e)
@@ -90,6 +93,7 @@ class Rag:
         """
         try:
             assert len(args) == 1, "Need one query"
+            assert isinstance(k, int), "k must be an Int"
             assert k > 0, "k must be at least 1"
             query = args[0]
             llm = LLM()

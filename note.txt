@@ -1,6 +1,6 @@
 change the lint command with . instead or src at evaluation
-need to write the 42 READMEs
-
+remove the index == 1 break in answering
+complete the resources
 
 
 Erros:

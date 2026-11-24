@@ -206,7 +206,6 @@ def start_searching_dataset(dataset_path: str,
         for token in tokens:
             list_tokens.append(Token(token))
         tokenized_questions.append(list_tokens)
-    print("nb questions:", len(tokenized_questions))
 
     list_top_minimal_source = retrieving(tokenized_questions, k)
 

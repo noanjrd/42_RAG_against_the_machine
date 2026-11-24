@@ -91,34 +91,36 @@ Both thresholds are met, the code score narrowly. Indexing and retrieval times w
 ## Design decisions
 
 - **BM25 over TF-IDF:** term-frequency saturation and length normalization suit chunks of very different sizes. Parameters were tuned empirically on the public datasets.
-- **One chunk per function for code:** a function is a natural unit that answers a question on its own.
-- **Identifier splitting and path words:** questions paraphrase while code quotes identifiers; indexing both forms and the file path widens what can match.
-- **Qwen3 tokenizer for indexing:** one tokenizer shared with the generation model, no extra dependency.
-- **Answer generation:** thinking mode disabled, answers capped at 75 new tokens, and a system message restricting the model to the provided documentation (and to say so when it does not know). Retrieved ranges are merged when they touch or overlap to save context.
-- **Robustness:** degenerate inputs (empty query, `k=0`, missing files, malformed JSON, search before indexing) are handled with clear messages instead of tracebacks.
+- **One folder per function:** each stage of the pipeline lives in its own folder (`src/index/`, `src/search/`, `src/answer/`, `src/llm/`, `src/evaluation/`, `src/models/`). Each folder has one job and can be read, tested and changed without touching the others, and each maps directly to a CLI command.
 
 ## Challenges faced
 
 - **Code recall:** only indexing functions leaves out classes, constants and module-level code. Identifier splitting and path words raised code recall above the threshold; indexing whole files is the next step.
-- **Exact paths and spans:** the grader compares `file_path` verbatim and uses character overlap, so chunk offsets had to be tracked exactly through recursive splitting.
+- **Reaching the 80% threshold:** documentation recall hovered just under 80%, so I had to tweak many small things (BM25 `k1` and `b`, stopword handling, path words, chunk size) and re-measure after each change until it passed.
+- **Understanding the recall score:** I first had to work out how recall@k is computed (a source counts as found when its character range overlaps the expected one with IoU >= 0.05, and the file path must match exactly) before I could tell why a retrieved chunk was or was not counted. This is why I wrote my own evaluation command.
 - **Small model:** Qwen3-0.6B gives short and sometimes wrong answers, and is slow on CPU. A restrictive system prompt, no thinking mode and a token cap keep answers focused and runtime reasonable.
 - **Speed:** scoring all questions of a dataset in a single pass over the index keeps retrieval well under the time limit.
 
 ## Example usage
 
-```bash
-$ uv run python -m src search "How to configure the OpenAI server?" --k 3
-data/raw/vllm-0.10.1/docs/serving/openai_compatible_server.md [9867:10100]
-data/raw/vllm-0.10.1/vllm/entrypoints/openai/api_server.py [267:400]
-...
+Build the index, then ask a single question and get the answer:
 
-$ ./moulinette evaluate_student_search_results \
-    data/output/search_results/UnansweredQuestions/dataset_docs_public.json \
-    data/datasets/AnsweredQuestions/dataset_docs_public.json \
-    --k 10 --max_context_length 2000
+```bash
+uv run python -m src index --max_chunk_size 2000
+uv run python -m src answer "How do I enable prefix caching?" --k 5
 ```
 
-(The paths above are illustrative; run the commands to see your own output.)
+Measure retrieval quality on the answered documentation dataset:
+
+```bash
+uv run python -m src search_dataset \
+    --dataset_path data/datasets/AnsweredQuestions/dataset_docs_public.json \
+    --k 5 --save_directory data/output/search_results/AnsweredQuestions
+uv run python -m src evaluate \
+    --student_search_results_path data/output/search_results/AnsweredQuestions/dataset_docs_public.json \
+    --dataset_path data/datasets/AnsweredQuestions/dataset_docs_public.json \
+    --k 5
+```
 
 ## Resources
 
