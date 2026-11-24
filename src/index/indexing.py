@@ -43,7 +43,7 @@ def path_token(path: str) -> list[str]:
     #  meaning ^ (not) [a-z0-9] (any lowercase letter or digit).
 
 
-def tokenize_content(chunks: list[Chunk], llm: LLM) -> None:
+def tokenize_content(chunks: list[Chunk]) -> None:
     """Fill the tokenized field of every chunk (in place).
 
     Tokens are lowercased and stripped of stopwords. For code chunks the
@@ -57,6 +57,7 @@ def tokenize_content(chunks: list[Chunk], llm: LLM) -> None:
         None.
     """
     n_chunks = len(chunks)
+    llm = LLM()
     for i in tqdm(range(n_chunks), desc="Tokenizing"):
         chunk = chunks[i]
         content = chunk.content.lower()
@@ -88,7 +89,7 @@ def list_all_files() -> list[str]:
     return files_list
 
 
-def start_indexing(max_chunk_size: int, llm: LLM) -> None:
+def start_indexing(max_chunk_size: int) -> None:
     """Run the whole indexing: chunk, tokenize and save.
 
     Args:
@@ -118,8 +119,7 @@ def start_indexing(max_chunk_size: int, llm: LLM) -> None:
                 chunks += chunk_text(max_chunk_size, file, text,
                                      ["\n# ", "\n## ", "\n### ", "\n\n", "\n"])
 
-            # print(file)
-    tokenize_content(chunks, llm)
+    tokenize_content(chunks)
     save_to_json(chunks)
     print(f"Ingestion complete! Indexed {len(chunks)} chunks "
           "under data/processed")

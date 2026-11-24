@@ -85,7 +85,8 @@ def calculate_BM25(chunks: list[dict[str, Any]],
     nb_chunks = len(chunks)
     min_index = [0] * questions_len
     min_value = [float('+inf')] * questions_len
-    for i_chunk, chunk in tqdm(enumerate(chunks), total=len(chunks)):
+    for i_chunk, chunk in tqdm(enumerate(chunks), total=len(chunks),
+                               desc="Scoring"):
         len_chunk = len(chunk["tokenized"])
         for quest_i, quest in enumerate(tokenized_quest):
             score = 0
@@ -127,7 +128,7 @@ def count_tokens_chunks(chunks: list[dict[str, Any]],
         The average number of tokens per chunk.
     """
     avg_token_chunks = 0
-    for chunk in tqdm(chunks, total=len(chunks)):
+    for chunk in tqdm(chunks, total=len(chunks), desc="Counting query terms"):
         avg_token_chunks += len(chunk["tokenized"])
         chunk["count_list"] = []
         tokens_occurence = count_tokens(chunk["tokenized"])
@@ -175,7 +176,7 @@ def retrieving(tokenized_questions: list[list[Token]],
     return list_top_minimal_source
 
 
-def start_searching_dataset(llm: LLM, dataset_path: str,
+def start_searching_dataset(dataset_path: str,
                             save_directory: str, k: int) -> None:
     """Search the k best chunks for each question of a dataset.
 
@@ -195,6 +196,7 @@ def start_searching_dataset(llm: LLM, dataset_path: str,
         rag_dataset = RagDataset.model_validate_json(f.read())
     file_name = os.path.basename(dataset_path)
     tokenized_questions = []
+    llm = LLM()
     for question in rag_dataset.rag_questions:
         tokens = llm.tokenize(question.question.lower())
         tokens = list(set(tokens))
@@ -218,7 +220,8 @@ def start_searching_dataset(llm: LLM, dataset_path: str,
             retrieved_sources=sources)
         list_minimal_search_res.append(minimal_search_res)
 
-    student_results = StudentSearchResults(search_results=list_minimal_search_res, k=k)
+    student_results = StudentSearchResults(
+        search_results=list_minimal_search_res, k=k)
     os.makedirs(save_directory, exist_ok=True)
     path = os.path.join(save_directory, file_name)
     with open(path, "w", encoding='utf-8') as f:

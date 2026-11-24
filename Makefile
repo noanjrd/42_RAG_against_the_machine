@@ -1,38 +1,38 @@
 run:
-	uv run 42-rag-against-the-machine
+	uv run python -m src
 
 index:
-	uv run 42-rag-against-the-machine index
+	HF_HUB_OFFLINE=1 uv run python -m src index
 
 search:
-	uv run 42-rag-against-the-machine search "where will i be able to see the benchmark results" --k 10
+	uv run python -m src search "where will i be able to see the benchmark results" --k 10
 
 search_dataset_docs:
-	HF_HUB_OFFLINE=1 uv run 42-rag-against-the-machine search_dataset --dataset_path ./data/datasets/UnansweredQuestions/dataset_docs_public.json --save_directory data/output/search_results/UnansweredQuestions --k 10
+	HF_HUB_OFFLINE=1 uv run python -m src search_dataset --dataset_path ./data/datasets/UnansweredQuestions/dataset_docs_public.json --save_directory data/output/search_results/UnansweredQuestions --k 10
 
 search_dataset_code:
-	HF_HUB_OFFLINE=1 uv run 42-rag-against-the-machine search_dataset --dataset_path ./data/datasets/UnansweredQuestions/dataset_code_public.json --save_directory data/output/search_results/UnansweredQuestions --k 10
+	HF_HUB_OFFLINE=1 uv run python -m src search_dataset --dataset_path ./data/datasets/UnansweredQuestions/dataset_code_public.json --save_directory data/output/search_results/UnansweredQuestions --k 10
 
 answer:
-	HF_HUB_OFFLINE=1 uv run 42-rag-against-the-machine answer "what are the standards?" --k 5
+	uv run python -m src answer "what are the standards?" --k 5
 
 answer_dataset_docs:
-	uv run 42-rag-against-the-machine answer_dataset --student_search_results_path data/output/search_results/UnansweredQuestions/dataset_docs_public.json --save_directory data/output/search_results_and_answer/UnansweredQuestions
+	uv run python -m src answer_dataset --student_search_results_path data/output/search_results/UnansweredQuestions/dataset_docs_public.json --save_directory data/output/search_results_and_answer/UnansweredQuestions
 
 answer_dataset_code:
-	uv run 42-rag-against-the-machine answer_dataset --student_search_results_path data/output/search_results/UnansweredQuestions/dataset_code_public.json --save_directory data/output/search_results_and_answer/UnansweredQuestions
+	uv run python -m src answer_dataset --student_search_results_path data/output/search_results/UnansweredQuestions/dataset_code_public.json --save_directory data/output/search_results_and_answer/UnansweredQuestions
 
 evaluate_docs:
-	uv run 42-rag-against-the-machine evaluate --student_search_results_path data/output/search_results/UnansweredQuestions/dataset_docs_public.json --dataset_path data/datasets/AnsweredQuestions/dataset_docs_public.json
+	uv run python -m src evaluate --student_search_results_path data/output/search_results/UnansweredQuestions/dataset_docs_public.json --dataset_path data/datasets/AnsweredQuestions/dataset_docs_public.json
 
 evaluate_code:
-	uv run 42-rag-against-the-machine evaluate --student_search_results_path data/output/search_results/UnansweredQuestions/dataset_code_public.json --dataset_path data/datasets/AnsweredQuestions/dataset_code_public.json
+	uv run python -m src evaluate --student_search_results_path data/output/search_results/UnansweredQuestions/dataset_code_public.json --dataset_path data/datasets/AnsweredQuestions/dataset_code_public.json
 
 install:
 	uv sync
 
 debug:
-	uv run python -m pdb -m src
+	python -m pdb -m src
 
 lint: 
 	uv run flake8 src && uv run mypy src --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs

@@ -7,6 +7,7 @@ from .answer.answering import start_answering, start_answering_dataset
 from .evaluation.evaluating import start_evaluating
 import sys
 
+
 class Rag:
     """Command line interface of the RAG pipeline.
 
@@ -27,8 +28,7 @@ class Rag:
         """
         try:
             assert max_chunk_size > 0, "max_chunk_size must be at least 1"
-            llm = LLM()
-            start_indexing(max_chunk_size, llm)
+            start_indexing(max_chunk_size)
         except AssertionError as e:
             print("Error:", e)
             sys.exit(1)
@@ -48,8 +48,8 @@ class Rag:
             assert len(args) == 1, "Need one query"
             assert k > 0, "k must be at least 1"
             query = args[0]
-            llm = LLM()
             print("Query:", query)
+            llm = LLM()
             start_searching(llm, query, k)
         except AssertionError as e:
             print("Error:", e)
@@ -71,9 +71,8 @@ class Rag:
         """
         try:
             assert k > 0, "k must be at least 1"
-            llm = LLM()
             print("k:", k)
-            start_searching_dataset(llm, dataset_path, save_directory, k)
+            start_searching_dataset(dataset_path, save_directory, k)
         except AssertionError as e:
             print("Error:", e)
             sys.exit(1)
@@ -117,9 +116,8 @@ class Rag:
             assert student_search_results_path, \
                 "student_search_results_path is empty"
             assert len(save_directory) > 0, "save_directory is empty"
-            llm = LLM()
             start_answering_dataset(
-                llm, student_search_results_path, save_directory)
+                student_search_results_path, save_directory)
         except AssertionError as e:
             print(e)
             sys.exit(1)
@@ -150,7 +148,7 @@ def main() -> None:
         print("Program interrupted")
         sys.exit(1)
     except Exception as e:
-        print("Error caught:",e)
+        print("Error caught:", e)
         sys.exit(1)
 
 

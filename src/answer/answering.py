@@ -1,5 +1,6 @@
 """Answer generation from retrieved sources."""
 from ..models.student_search import MinimalAnswer
+from ..models.student_search import StudentSearchResultsAndAnswer
 from ..llm.LLM import LLM
 import json
 from tqdm import tqdm
@@ -36,10 +37,8 @@ def make_prompt(query: str, sources: list[Any]) -> str:
     return prompt
 
 
-def start_answering_dataset(
-        llm: LLM,
-        student_search_results_path: str,
-        save_directory: str) -> None:
+def start_answering_dataset(student_search_results_path: str,
+                            save_directory: str) -> None:
     """Answer every question of a saved search-results file.
 
     The answers are saved as JSON in save_directory, under the name of
@@ -58,20 +57,32 @@ def start_answering_dataset(
     file_name = os.path.basename(student_search_results_path)
     output = {"k": file["k"], "search_results": []}
     file = file["search_results"]
+    file_n = len(file)
+    llm = LLM()
+    index = 0
     for q in tqdm(file, desc="Answering"):
-        prompt = make_prompt(q["question"], q["retrieved_sources"])
-        answer = llm.answer(prompt)
-        MiniAns = MinimalAnswer(
-            answer=answer,
-            question_id=q["question_id"],
-            question=q["question"],
-            retrieved_sources=q["retrieved_sources"])
-        output["search_results"].append(MiniAns.model_dump())
-
+        try:
+            if index == 1:
+                break
+            prompt = make_prompt(q["question"], q["retrieved_sources"])
+            answer = llm.answer(prompt)
+            MiniAns = MinimalAnswer(
+                answer=answer,
+                question_id=q["question_id"],
+                question=q["question"],
+                retrieved_sources=q["retrieved_sources"])
+            index += 1
+            output["search_results"].append(MiniAns.model_dump())
+        except Exception:
+            continue
+    student_search_answer = StudentSearchResultsAndAnswer(k=output["k"], 
+                                            search_results=output["search_results"])
     os.makedirs(save_directory, exist_ok=True)
     path = os.path.join(save_directory, file_name)
     with open(path, "w", encoding='utf-8') as f:
-        json.dump(output, f, indent=2, ensure_ascii=False)
+        f.write(student_search_answer.model_dump_json(indent=2))
+    print(f"Loaded {file_n} questions ... Processed {len(student_search_answer.search_results)} of {file_n} questions")
+    print(f"Saved student_search_results_and_answer to {save_directory}")
     return
 
 
